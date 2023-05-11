@@ -4,6 +4,10 @@ import time
 import hashlib
 import subprocess
 
+"""
+journalctl -o short-monotonic -u weston -u weston-ready -u agnos-tests
+"""
+
 if __name__ == "__main__":
   socket_exists = os.path.exists("/var/tmp/weston/wayland-0")
   is_active = subprocess.check_output("systemctl is-active weston", shell=True, encoding='utf8').strip()
@@ -27,7 +31,7 @@ if __name__ == "__main__":
   out, err = proc.stdout.read(), proc.stderr.read()
 
   with open('/data/weston_log', 'a') as f:
-    f.write(f"{is_active=}, {socket_exists=}, app={rc} / {h}\n")
+    f.write(f"{is_active=}, {socket_exists=}, {rc=} / {h}\n")
     if rc is not None:
       f.write(f"  stdout: {out}\n")
       f.write(f"  stderr: {err}\n")
@@ -36,5 +40,6 @@ if __name__ == "__main__":
   os.system("sudo su -c 'tail /data/weston_log > /dev/console'")
   os.system("sudo su -c 'wc -l /data/weston_log > /dev/console'")
 
-  time.sleep(2)
-  os.system("sudo reboot")
+  #if rc is None:
+  #  time.sleep(2)
+  #  os.system("sudo reboot")
