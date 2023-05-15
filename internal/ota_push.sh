@@ -48,19 +48,8 @@ SAS_EXPIRY=$(date -u '+%Y-%m-%dT%H:%M:%SZ' -d '+1 hour')
 DATA_SAS_TOKEN=$(az storage container generate-sas --as-user --auth-mode login --account-name $DATA_ACCOUNT --name $DATA_CONTAINER --https-only --permissions wr --expiry $SAS_EXPIRY --output tsv)
 
 # Liftoff!
-SYSTEM_FILE_NAME="system-$SYSTEM_HASH.img.xz"
 SYSTEM_CAIBX_FILE_NAME="system-$SYSTEM_HASH.caibx"
 SYSTEM_CHUNKS_FOLDER="system-$SYSTEM_HASH"
-BOOT_FILE_NAME="boot-$BOOT_HASH.img.xz"
-ABL_FILE_NAME="abl-$ABL_HASH.img.xz"
-XBL_FILE_NAME="xbl-$XBL_HASH.img.xz"
-XBL_CONFIG_FILE_NAME="xbl_config-$XBL_CONFIG_HASH.img.xz"
-DEVCFG_FILE_NAME="devcfg-$DEVCFG_HASH.img.xz"
-AOP_FILE_NAME="aop-$AOP_HASH.img.xz"
-
-echo "Copying system to the cloud..."
-SYSTEM_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$SYSTEM_FILE_NAME"
-azcopy cp --overwrite=false $OTA_DIR/$SYSTEM_FILE_NAME "$SYSTEM_CLOUD_PATH?$DATA_SAS_TOKEN"
 
 #echo "Copying system.caibx to the cloud..."
 #SYSTEM_CAIBX_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$SYSTEM_CAIBX_FILE_NAME"
@@ -70,29 +59,43 @@ azcopy cp --overwrite=false $OTA_DIR/$SYSTEM_FILE_NAME "$SYSTEM_CLOUD_PATH?$DATA
 #SYSTEM_CHUNKS_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER"
 #azcopy cp --recursive=true --overwrite=false $OTA_DIR/$SYSTEM_CHUNKS_FOLDER "$SYSTEM_CHUNKS_PATH?$DATA_SAS_TOKEN"
 
-echo "Copying boot to the cloud..."
-BOOT_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$BOOT_FILE_NAME"
-azcopy cp --overwrite=false $OTA_DIR/$BOOT_FILE_NAME "$BOOT_CLOUD_PATH?$DATA_SAS_TOKEN"
+for EXT in gz xz; do
+  SYSTEM_FILE_NAME="system-$SYSTEM_HASH.img.$EXT"
+  BOOT_FILE_NAME="boot-$BOOT_HASH.img.$EXT"
+  ABL_FILE_NAME="abl-$ABL_HASH.img.$EXT"
+  XBL_FILE_NAME="xbl-$XBL_HASH.img.$EXT"
+  XBL_CONFIG_FILE_NAME="xbl_config-$XBL_CONFIG_HASH.img.$EXT"
+  DEVCFG_FILE_NAME="devcfg-$DEVCFG_HASH.img.$EXT"
+  AOP_FILE_NAME="aop-$AOP_HASH.img.$EXT"
 
-echo "Copying abl to the cloud..."
-ABL_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$ABL_FILE_NAME"
-azcopy cp --overwrite=false $OTA_DIR/$ABL_FILE_NAME "$ABL_CLOUD_PATH?$DATA_SAS_TOKEN"
+  echo "Copying system.img.$EXT to the cloud..."
+  SYSTEM_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$SYSTEM_FILE_NAME"
+  azcopy cp --overwrite=false $OTA_DIR/$SYSTEM_FILE_NAME "$SYSTEM_CLOUD_PATH?$DATA_SAS_TOKEN"
 
-echo "Copying xbl to the cloud..."
-XBL_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$XBL_FILE_NAME"
-azcopy cp --overwrite=false $OTA_DIR/$XBL_FILE_NAME "$XBL_CLOUD_PATH?$DATA_SAS_TOKEN"
+  echo "Copying boot.img.$EXT to the cloud..."
+  BOOT_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$BOOT_FILE_NAME"
+  azcopy cp --overwrite=false $OTA_DIR/$BOOT_FILE_NAME "$BOOT_CLOUD_PATH?$DATA_SAS_TOKEN"
 
-echo "Copying xbl_config to the cloud..."
-XBL_CONFIG_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$XBL_CONFIG_FILE_NAME"
-azcopy cp --overwrite=false $OTA_DIR/$XBL_CONFIG_FILE_NAME "$XBL_CONFIG_CLOUD_PATH?$DATA_SAS_TOKEN"
+  echo "Copying abl.img.$EXT to the cloud..."
+  ABL_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$ABL_FILE_NAME"
+  azcopy cp --overwrite=false $OTA_DIR/$ABL_FILE_NAME "$ABL_CLOUD_PATH?$DATA_SAS_TOKEN"
 
-echo "Copying devcfg to the cloud..."
-DEVCFG_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$DEVCFG_FILE_NAME"
-azcopy cp --overwrite=false $OTA_DIR/$DEVCFG_FILE_NAME "$DEVCFG_CLOUD_PATH?$DATA_SAS_TOKEN"
+  echo "Copying xbl.img.$EXT to the cloud..."
+  XBL_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$XBL_FILE_NAME"
+  azcopy cp --overwrite=false $OTA_DIR/$XBL_FILE_NAME "$XBL_CLOUD_PATH?$DATA_SAS_TOKEN"
 
-echo "Copying aop to the cloud..."
-AOP_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$AOP_FILE_NAME"
-azcopy cp --overwrite=false $OTA_DIR/$AOP_FILE_NAME "$AOP_CLOUD_PATH?$DATA_SAS_TOKEN"
+  echo "Copying xbl_config.img.$EXT to the cloud..."
+  XBL_CONFIG_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$XBL_CONFIG_FILE_NAME"
+  azcopy cp --overwrite=false $OTA_DIR/$XBL_CONFIG_FILE_NAME "$XBL_CONFIG_CLOUD_PATH?$DATA_SAS_TOKEN"
+
+  echo "Copying devcfg.img.$EXT to the cloud..."
+  DEVCFG_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$DEVCFG_FILE_NAME"
+  azcopy cp --overwrite=false $OTA_DIR/$DEVCFG_FILE_NAME "$DEVCFG_CLOUD_PATH?$DATA_SAS_TOKEN"
+
+  echo "Copying aop.img.$EXT to the cloud..."
+  AOP_CLOUD_PATH="https://$DATA_ACCOUNT.blob.core.windows.net/$DATA_CONTAINER/$AOP_FILE_NAME"
+  azcopy cp --overwrite=false $OTA_DIR/$AOP_FILE_NAME "$AOP_CLOUD_PATH?$DATA_SAS_TOKEN"
+done
 
 echo "Done!"
 echo "  System path: $SYSTEM_CLOUD_PATH"

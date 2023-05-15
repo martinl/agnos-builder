@@ -64,28 +64,34 @@ AOP_HASH=$(sha256sum $AOP_IMAGE | cut -c 1-64)
 AOP_SIZE=$(wc -c < $AOP_IMAGE)
 
 # Compressing
-SYSTEM_ARCHIVE=$OTA_OUTPUT_DIR/system-$SYSTEM_HASH.img.xz
-BOOT_ARCHIVE=$OTA_OUTPUT_DIR/boot-$BOOT_HASH.img.xz
-ABL_ARCHIVE=$OTA_OUTPUT_DIR/abl-$ABL_HASH.img.xz
-XBL_ARCHIVE=$OTA_OUTPUT_DIR/xbl-$XBL_HASH.img.xz
-XBL_CONFIG_ARCHIVE=$OTA_OUTPUT_DIR/xbl_config-$XBL_CONFIG_HASH.img.xz
-DEVCFG_ARCHIVE=$OTA_OUTPUT_DIR/devcfg-$DEVCFG_HASH.img.xz
-AOP_ARCHIVE=$OTA_OUTPUT_DIR/aop-$AOP_HASH.img.xz
+for compress in "xz xz" "gz gzip"; do
+  a=($compress)
+  EXT=${a[0]}
+  COMPRESS=${a[1]}
 
-echo "Compressing system..."
-xz -vc $SYSTEM_IMAGE > $SYSTEM_ARCHIVE
-echo "Compressing boot..."
-xz -vc $BOOT_IMAGE > $BOOT_ARCHIVE
-echo "Compressing abl..."
-xz -vc $ABL_IMAGE > $ABL_ARCHIVE
-echo "Compressing xbl..."
-xz -vc $XBL_IMAGE > $XBL_ARCHIVE
-echo "Compressing xbl_config..."
-xz -vc $XBL_CONFIG_IMAGE > $XBL_CONFIG_ARCHIVE
-echo "Compressing devcfg..."
-xz -vc $DEVCFG_IMAGE > $DEVCFG_ARCHIVE
-echo "Compressing aop..."
-xz -vc $AOP_IMAGE > $AOP_ARCHIVE
+  SYSTEM_ARCHIVE=$OTA_OUTPUT_DIR/system-$SYSTEM_HASH.img.$EXT
+  BOOT_ARCHIVE=$OTA_OUTPUT_DIR/boot-$BOOT_HASH.img.$EXT
+  ABL_ARCHIVE=$OTA_OUTPUT_DIR/abl-$ABL_HASH.img.$EXT
+  XBL_ARCHIVE=$OTA_OUTPUT_DIR/xbl-$XBL_HASH.img.$EXT
+  XBL_CONFIG_ARCHIVE=$OTA_OUTPUT_DIR/xbl_config-$XBL_CONFIG_HASH.img.$EXT
+  DEVCFG_ARCHIVE=$OTA_OUTPUT_DIR/devcfg-$DEVCFG_HASH.img.$EXT
+  AOP_ARCHIVE=$OTA_OUTPUT_DIR/aop-$AOP_HASH.img.$EXT
+
+  echo "Compressing system.img.$EXT..."
+  $COMPRESS -vc $SYSTEM_IMAGE > $SYSTEM_ARCHIVE
+  echo "Compressing boot.img.$EXT..."
+  $COMPRESS -vc $BOOT_IMAGE > $BOOT_ARCHIVE
+  echo "Compressing abl.img.$EXT..."
+  $COMPRESS -vc $ABL_IMAGE > $ABL_ARCHIVE
+  echo "Compressing xbl.img.$EXT..."
+  $COMPRESS -vc $XBL_IMAGE > $XBL_ARCHIVE
+  echo "Compressing xbl_config.img.$EXT..."
+  $COMPRESS -vc $XBL_CONFIG_IMAGE > $XBL_CONFIG_ARCHIVE
+  echo "Compressing devcfg.img.$EXT..."
+  $COMPRESS -vc $DEVCFG_IMAGE > $DEVCFG_ARCHIVE
+  echo "Compressing aop.img.$EXT..."
+  $COMPRESS -vc $AOP_IMAGE > $AOP_ARCHIVE
+done
 
 #echo "Creating system casync files"
 #casync make --compression=xz --store $OTA_OUTPUT_DIR/system-$SYSTEM_HASH $OTA_OUTPUT_DIR/system-$SYSTEM_HASH.caibx $SYSTEM_IMAGE_RAW
